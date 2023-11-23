@@ -1,11 +1,23 @@
 "use client";
 import styles from "./page.module.css";
-import { Provider } from "react-redux";
+import { Provider, useDispatch } from "react-redux";
 import { store } from "../../store";
 import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
+import { useEffect } from "react";
+import { check } from "../../API/userApi";
+import { setAuth, setUser } from "../../store/slices/authSlice";
 
 export default function Home() {
+  const dispatch = useDispatch();
+  useEffect(() => {
+    if (localStorage.getItem("userToken")) {
+      check().then((data) => {
+        dispatch(setUser(data));
+        dispatch(setAuth(true));
+      });
+    }
+  }, []);
   return (
     <Provider store={store}>
       <Header />

@@ -11,6 +11,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import { setAuth, setUser } from "../../../store/slices/authSlice";
+import Link from "next/link";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
@@ -38,29 +39,50 @@ export default function Header() {
         handleClose={handleClose}
       />
       <AppBar color="transparent" position="static">
-        <Toolbar>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Blog
-          </Typography>
-          {user.email ? (
-            <>
-              <Typography>{user.email}</Typography>
-              <Button onClick={logOut}>log out</Button>
-            </>
-          ) : (
-            <Button color="inherit" onClick={handleClickOpen}>
-              Login
-            </Button>
-          )}
+        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+          <Box display="flex">
+            <IconButton
+              size="large"
+              edge="start"
+              color="inherit"
+              aria-label="menu"
+              sx={{ mr: 2 }}
+            >
+              <MenuIcon />
+            </IconButton>
+
+            <Typography mt={1} variant="h6">
+              <Link style={{ textDecoration: "none" }} color="success" href="/">
+                Home
+              </Link>
+            </Typography>
+            <Typography mt={1} ml={2} variant="h6">
+              {isAuth && (
+                <Link
+                  style={{ textDecoration: "none" }}
+                  color="success"
+                  href="/personal"
+                >
+                  Personal area
+                </Link>
+              )}
+            </Typography>
+          </Box>
+
+          <Box display="flex">
+            {user.email ? (
+              <>
+                <Typography variant="h6" mr={1}>
+                  {user.email}
+                </Typography>
+                <Button onClick={logOut}>log out</Button>
+              </>
+            ) : (
+              <Button color="inherit" onClick={handleClickOpen}>
+                Login
+              </Button>
+            )}
+          </Box>
         </Toolbar>
       </AppBar>
     </Box>

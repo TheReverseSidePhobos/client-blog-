@@ -12,3 +12,8 @@
 .footer {
   margin-top: auto;
 }
+a:visited,
+a:focus,
+a:hover {
+  color: #000;
+}
