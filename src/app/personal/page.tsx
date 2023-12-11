@@ -114,6 +114,7 @@ const Personal = () => {
     "#16bb44",
     "#ea200b",
     "#163471",
+    "#fc8900",
   ];
   return (
     <Provider store={store}>
