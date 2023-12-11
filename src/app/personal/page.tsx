@@ -25,15 +25,29 @@ import CircularProgress from "@mui/material/CircularProgress";
 import CardComponent from "@/components/Post/Post";
 import { BoxColorStyled } from "./styled";
 import ColorButtons from "@/components/ColorButtons/ColorButtons";
+import {
+  addOneMyPosts,
+  postState,
+  setMyPosts,
+} from "../../../store/slices/postsSlice";
+
 const Personal = () => {
   const { user, isAuth, isOpenAuthModal } = useSelector(
     (state: RootState) => state.auth
   );
-  const [posts, setposts] = React.useState([]);
+  const { myPosts } = useSelector((state: RootState) => state.posts);
+  // const [posts, setposts] = React.useState([]);
+  console.log("myPosts: ", myPosts);
+
+  const dispatch = useDispatch();
   const [isGettingPosts, setisGettingPosts] = React.useState(false);
+
   const func = async () => {
     try {
-      await getAllPostsByUserId(user.id).then((items) => setposts(items));
+      await getAllPostsByUserId(user.id).then((items) => {
+        const myPosts = items.filter((item) => item.userId === user.id);
+        dispatch(setMyPosts(myPosts));
+      });
     } catch (error) {
       alert("Something went wrong!");
     } finally {
@@ -48,7 +62,7 @@ const Personal = () => {
       redirect("/");
     }
   }, [isAuth]);
-  const dispatch = useDispatch();
+
   useEffect(() => {
     if (localStorage.getItem("userToken")) {
       check().then((data) => {
@@ -63,7 +77,6 @@ const Personal = () => {
     const date = new Date();
 
     try {
-      debugger;
       await createPost(
         data.description,
         data.title,
@@ -71,14 +84,19 @@ const Personal = () => {
         date,
         selectedColor,
         0
-      );
+      ).then((newPost) => {
+        dispatch(addOneMyPosts(newPost));
+        func();
+      });
     } catch (e) {
       console.log(e);
       alert("Something went wrong!");
+    } finally {
+      reset();
     }
   };
 
-  const { register, handleSubmit, watch } = useForm();
+  const { register, handleSubmit, watch, reset } = useForm();
   const title = watch("title");
   const description = watch("description");
   const onSubmit = (data) => {
@@ -107,8 +125,8 @@ const Personal = () => {
           </h2>
           {isGettingPosts && <CircularProgress />}
           <Typography textAlign="center">ALL YOUR POSTS</Typography>
-          {posts &&
-            posts.map((item, id) => (
+          {myPosts &&
+            myPosts.map((item, id) => (
               <>
                 <CardComponent post={item} />
               </>
@@ -143,7 +161,6 @@ const Personal = () => {
                 disabled={!title || !description}
                 onClick={() => {
                   setisGettingPosts(true);
-                  window.location.reload();
                 }}
                 sx={{ my: "10px" }}
                 color="success"
