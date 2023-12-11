@@ -96,12 +96,25 @@ const Personal = () => {
     }
   };
 
-  const { register, handleSubmit, watch, reset } = useForm();
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+
+    formState: { isDirty, dirtyFields, touchedFields, errors },
+  } = useForm({
+    defaultValues: {
+      title: "",
+      description: "",
+    },
+  });
   const title = watch("title");
   const description = watch("description");
   const onSubmit = (data) => {
     onSub(data);
   };
+  console.log("touchedFields: ", touchedFields);
   const colorArr = [
     "#f1e7c5",
     "#f0c3b9",
@@ -116,6 +129,7 @@ const Personal = () => {
     "#163471",
     "#fc8900",
   ];
+
   return (
     <Provider store={store}>
       <Header />
@@ -140,6 +154,12 @@ const Personal = () => {
                 id="title"
                 label="Title"
                 variant="outlined"
+                helperText={
+                  touchedFields.title && !title
+                    ? "is required"
+                    : "make up new title"
+                }
+                error={touchedFields.title && !title}
               />
               <TextField
                 margin="normal"
@@ -147,7 +167,18 @@ const Personal = () => {
                 id="description"
                 label="Description"
                 variant="outlined"
+                multiline
+                maxRows={5}
+                error={touchedFields.description && !description}
+                helperText={
+                  touchedFields.title && !title
+                    ? "is required"
+                    : "type here what you did today"
+                }
               />
+              {dirtyFields.description && (
+                <Typography>dirtyFields.description</Typography>
+              )}
               <Box display="flex">
                 {colorArr.map((item, id) => (
                   <ColorButtons
