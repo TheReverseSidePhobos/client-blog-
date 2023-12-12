@@ -20,15 +20,22 @@ import Tooltip from "@mui/material/Tooltip";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import { setMyPosts } from "../../../store/slices/postsSlice";
 
-export default function CardComponent({ post, isForAllUsers }) {
-  const { user, isAuth, isOpenAuthModal } = useSelector(
-    (state: RootState) => state.auth
-  );
+export interface CardComponentProp {
+  post: any;
+  isForAllUsers?: boolean;
+}
+
+// TODO REMOVE ANY
+export default function CardComponent({
+  post,
+  isForAllUsers,
+}: CardComponentProp) {
+  const { user } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
   const func = async () => {
     try {
       await getAllPostsByUserId(user.id).then((items) => {
-        const myPosts = items.filter((item) => item.userId === user.id);
+        const myPosts = items.filter((item: any) => item.userId === user.id);
         dispatch(setMyPosts(myPosts));
       });
     } catch (error) {
@@ -52,7 +59,7 @@ export default function CardComponent({ post, isForAllUsers }) {
       alert("Something went wrong!");
     }
   };
-  const [postLikes, setPostLikes] = React.useState([]);
+  const [postLikes, setPostLikes] = React.useState<any>([]);
   const getAllLikesByPostIdHnadler = async (postId: number) => {
     try {
       await getAllLikesByPostId(postId).then((likes) => setPostLikes(likes));

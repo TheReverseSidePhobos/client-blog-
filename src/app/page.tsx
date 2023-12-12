@@ -9,10 +9,11 @@ import { check } from "../../API/userApi";
 import { setAuth, setUser } from "../../store/slices/authSlice";
 import { getAllPosts } from "../../API/postAPI";
 import CardComponent from "@/components/Post/Post";
-import { Button, ButtonGroup, Container } from "@mui/material";
+import { Box, Button, ButtonGroup, Container } from "@mui/material";
 import { setAllPosts } from "../../store/slices/postsSlice";
 import { initLocales } from "./locales/initLocales";
 import intl from "react-intl-universal";
+import LinearProgress from "@mui/material/LinearProgress";
 
 export default function Home() {
   const dispatch = useDispatch();
@@ -22,24 +23,22 @@ export default function Home() {
   const [language, setLanguage] = useState("ru-RU");
 
   const { allPosts } = useSelector((state: RootState) => state.posts);
-  console.log("allPosts: ", allPosts);
+
   initLocales(language);
   useEffect(() => {
     const lng = localStorage.getItem("lng");
 
     if (lng) {
-      debugger;
       setLanguage(lng);
     } else {
       setLanguage("ru-RU");
     }
     initLocales(language);
   }, []);
-  // const [allPosts, setAllPosts] = useState([]);
+
   const start = async () => {
     try {
       await getAllPosts().then((posts) => {
-        // setAllPosts(posts);
         dispatch(setAllPosts(posts));
       });
     } catch (error) {
@@ -57,44 +56,35 @@ export default function Home() {
     start();
   }, []);
 
-  console.log("allPosts: ", allPosts);
   return (
     <Provider store={store}>
-      <Header />
+      <Header setLanguage={setLanguage} />
 
-      <ButtonGroup disableElevation variant="contained" color="primary">
-        <Button
-          onClick={() => {
-            localStorage.setItem("lng", "en-US");
-            setLanguage("en-US");
-          }}
-        >
-          eng
-        </Button>
-        <Button
-          onClick={() => {
-            localStorage.setItem("lng", "ru-RU");
-            setLanguage("ru-RU");
-          }}
-        >
-          ru
-        </Button>
-      </ButtonGroup>
       <div className="wrapper">
-        <main>
-          <h2 className={styles.mainTitle}>{intl.get("MAIN_TITLE")}</h2>
-          {!isAuth && (
-            <h5 className={styles.subTitle}>{intl.get("PLEASE_LOGIN")}</h5>
-          )}
-        </main>
-        <Container>
-          {allPosts.map((item, id) => (
-            <CardComponent key={id} post={item} isForAllUsers={true} />
-          ))}
-        </Container>
-        <div className="footer">
-          <Footer />
-        </div>
+        {!isAuth && !user ? (
+          <Container>
+            <Box marginTop="20%">
+              <LinearProgress />
+            </Box>
+          </Container>
+        ) : (
+          <>
+            <main>
+              <h2 className={styles.mainTitle}>{intl.get("MAIN_TITLE")}</h2>
+              {!isAuth && !user && (
+                <h5 className={styles.subTitle}>{intl.get("PLEASE_LOGIN")}</h5>
+              )}
+            </main>
+            <Container>
+              {allPosts.map((item, id) => (
+                <CardComponent key={id} post={item} isForAllUsers={true} />
+              ))}
+            </Container>
+            <div className="footer">
+              <Footer />
+            </div>
+          </>
+        )}
       </div>
     </Provider>
   );

@@ -4,16 +4,22 @@ import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
-import MenuIcon from "@mui/icons-material/Menu";
+
 import ModalDialog from "../Modal/Modal";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import { setAuth, setUser } from "../../../store/slices/authSlice";
 import Link from "next/link";
+import Sidebar from "../Sidebar/Sidebar";
+import intl from "react-intl-universal";
+import { CircularProgress } from "@mui/material";
 
-export default function Header() {
+export interface HeaderProp {
+  setLanguage?: (language: string) => void;
+}
+
+export default function Header({ setLanguage }: HeaderProp) {
   const [open, setOpen] = useState(false);
   const { user, isAuth, isOpenAuthModal } = useSelector(
     (state: RootState) => state.auth
@@ -31,6 +37,7 @@ export default function Header() {
     dispatch(setAuth(false));
     localStorage.removeItem("userToken");
   };
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <ModalDialog
@@ -41,29 +48,29 @@ export default function Header() {
       <AppBar color="transparent" position="static">
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           <Box display="flex">
-            <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              aria-label="menu"
-              sx={{ mr: 2 }}
-            >
-              <MenuIcon />
-            </IconButton>
+            <Sidebar setLanguage={setLanguage} />
 
             <Typography mt={1} variant="h6">
-              <Link style={{ textDecoration: "none" }} color="success" href="/">
-                Home
+              <Link
+                style={{
+                  textDecoration: "none",
+                }}
+                color="success"
+                href="/"
+              >
+                {intl.get("HOME")}
               </Link>
             </Typography>
             <Typography mt={1} ml={2} variant="h6">
               {isAuth && (
                 <Link
-                  style={{ textDecoration: "none" }}
+                  style={{
+                    textDecoration: "none",
+                  }}
                   color="success"
                   href="/personal"
                 >
-                  Personal area
+                  {intl.get("PERSONAL_AREA")}
                 </Link>
               )}
             </Typography>
@@ -75,11 +82,13 @@ export default function Header() {
                 <Typography variant="h6" mr={1}>
                   {user.email}
                 </Typography>
-                <Button onClick={logOut}>log out</Button>
+                <Button onClick={logOut}> {intl.get("LOGOUT")}</Button>
               </>
+            ) : !isAuth && !user ? (
+              <CircularProgress />
             ) : (
               <Button color="inherit" onClick={handleClickOpen}>
-                Login
+                {intl.get("LOGIN")}
               </Button>
             )}
           </Box>

@@ -1,5 +1,18 @@
 {
     "PROJECT": "Project",
     "MAIN_TITLE": "You are on the main page of the site",
-    "PLEASE_LOGIN": "Please login for using app"
+    "PLEASE_LOGIN": "Please login for using app",
+    "SELECT_LANGUAGE": "Select language",
+    "PERSONAL_AREA": "Personal area",
+    "HOME": "Home",
+    "LOGIN": "Log in",
+    "LOGOUT": "Log out",
+    "LOGIN_FORM_TITLE": "Log in",
+    "REGISTRATION_FORM_TITLE": "Registration",
+    "PASSWORD": "Password",
+    "EMAIL": "Email",
+    "SUBMIT": "Submit",
+    "GO_TO_REG": "Go to registration",
+    "ALREADY_HAVE_ACC": "Already have an acc?",
+    "ALL_YOUR_POSTS": "ALL YOUR POSTS"
 }

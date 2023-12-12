@@ -30,14 +30,14 @@ import {
   postState,
   setMyPosts,
 } from "../../../store/slices/postsSlice";
+import intl from "react-intl-universal";
 
+// TODO REMOVE ANY
 const Personal = () => {
   const { user, isAuth, isOpenAuthModal } = useSelector(
     (state: RootState) => state.auth
   );
   const { myPosts } = useSelector((state: RootState) => state.posts);
-  // const [posts, setposts] = React.useState([]);
-  console.log("myPosts: ", myPosts);
 
   const dispatch = useDispatch();
   const [isGettingPosts, setisGettingPosts] = React.useState(false);
@@ -45,7 +45,7 @@ const Personal = () => {
   const func = async () => {
     try {
       await getAllPostsByUserId(user.id).then((items) => {
-        const myPosts = items.filter((item) => item.userId === user.id);
+        const myPosts = items.filter((item: any) => item.userId === user.id);
         dispatch(setMyPosts(myPosts));
       });
     } catch (error) {
@@ -73,7 +73,7 @@ const Personal = () => {
   }, []);
   const [selectedColor, setSelectedColor] = useState("#f1e7c5");
 
-  const onSub = async (data) => {
+  const onSub = async (data: any) => {
     const date = new Date();
 
     try {
@@ -111,10 +111,10 @@ const Personal = () => {
   });
   const title = watch("title");
   const description = watch("description");
-  const onSubmit = (data) => {
+  const onSubmit = (data: any) => {
     onSub(data);
   };
-  console.log("touchedFields: ", touchedFields);
+
   const colorArr = [
     "#f1e7c5",
     "#f0c3b9",
@@ -136,10 +136,12 @@ const Personal = () => {
       <Box className="wrapper">
         <Container>
           <h2 style={{ marginTop: "24px", textAlign: "center" }}>
-            Personal area
+            {intl.get("PERSONAL_AREA")}
           </h2>
           {isGettingPosts && <CircularProgress />}
-          <Typography textAlign="center">ALL YOUR POSTS</Typography>
+          <Typography textAlign="center">
+            {intl.get("ALL_YOUR_POSTS")}
+          </Typography>
           {myPosts &&
             myPosts.map((item, id) => (
               <>

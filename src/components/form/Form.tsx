@@ -6,10 +6,21 @@ import { registration, login } from "../../../API/userApi";
 import { useDispatch } from "react-redux";
 import { setAuth, setUser } from "../../../store/slices/authSlice";
 import { useState } from "react";
+import intl from "react-intl-universal";
 
-const Form = ({ handleClose, isLogin, setIsLogin }) => {
+export interface FormProp {
+  handleClose: any;
+  isLogin: boolean;
+  setIsLogin: (isLogin: boolean) => void;
+}
+export interface dataProp {
+  email: string;
+  password: string;
+}
+
+const Form = ({ handleClose, isLogin, setIsLogin }: FormProp) => {
   const dispatch = useDispatch();
-  const onSub = async (data) => {
+  const onSub = async (data: dataProp) => {
     try {
       let userdata;
       if (isLogin) {
@@ -29,7 +40,7 @@ const Form = ({ handleClose, isLogin, setIsLogin }) => {
     setIsLogin(!isLogin);
   };
   const { register, handleSubmit } = useForm();
-  const onSubmit = (data) => onSub(data);
+  const onSubmit = (data: any) => onSub(data);
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Box display="flex" justifyContent="center" flexDirection="column">
@@ -37,14 +48,14 @@ const Form = ({ handleClose, isLogin, setIsLogin }) => {
           margin="normal"
           {...register("email")}
           id="email"
-          label="Email"
+          label={intl.get("EMAIL")}
           variant="outlined"
         />
         <TextField
           margin="normal"
           {...register("password")}
           id="password"
-          label="Password"
+          label={intl.get("PASSWORD")}
           variant="outlined"
         />
 
@@ -54,7 +65,7 @@ const Form = ({ handleClose, isLogin, setIsLogin }) => {
           variant="contained"
           type="submit"
         >
-          Submit
+          {intl.get("SUBMIT")}
         </Button>
 
         <Button
@@ -63,7 +74,7 @@ const Form = ({ handleClose, isLogin, setIsLogin }) => {
           color="primary"
           onClick={handleChangeModal}
         >
-          {isLogin ? "Go to registration" : "already have an acc?"}
+          {isLogin ? intl.get("GO_TO_REG") : intl.get("ALREADY_HAVE_ACC")}
         </Button>
       </Box>
     </form>
