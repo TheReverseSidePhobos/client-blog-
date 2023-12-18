@@ -31,9 +31,22 @@ import {
   setMyPosts,
 } from "../../../store/slices/postsSlice";
 import intl from "react-intl-universal";
+import { initLocales } from "../locales/initLocales";
 
 // TODO REMOVE ANY
 const Personal = () => {
+  const [language, setLanguage] = useState("ru-RU");
+  initLocales(language);
+  useEffect(() => {
+    const lng = localStorage.getItem("lng");
+
+    if (lng) {
+      setLanguage(lng);
+    } else {
+      setLanguage("ru-RU");
+    }
+    initLocales(language);
+  }, []);
   const { user, isAuth, isOpenAuthModal } = useSelector(
     (state: RootState) => state.auth
   );

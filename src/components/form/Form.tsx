@@ -52,6 +52,7 @@ const Form = ({ handleClose, isLogin, setIsLogin }: FormProp) => {
           variant="outlined"
         />
         <TextField
+          type="password"
           margin="normal"
           {...register("password")}
           id="password"
