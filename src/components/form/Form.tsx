@@ -5,7 +5,6 @@ import { Box, Button } from "@mui/material";
 import { registration, login } from "../../../API/userApi";
 import { useDispatch } from "react-redux";
 import { setAuth, setUser } from "../../../store/slices/authSlice";
-import { useState } from "react";
 import intl from "react-intl-universal";
 
 export interface FormProp {

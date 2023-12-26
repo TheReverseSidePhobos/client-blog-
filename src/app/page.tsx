@@ -8,18 +8,19 @@ import { useEffect, useState } from "react";
 import { check } from "../../API/userApi";
 import { setAuth, setUser } from "../../store/slices/authSlice";
 import { getAllPosts } from "../../API/postAPI";
-import CardComponent from "@/components/Post/Post";
-import { Box, Button, ButtonGroup, Container } from "@mui/material";
+
+import { Box, Container } from "@mui/material";
 import { setAllPosts } from "../../store/slices/postsSlice";
 import { initLocales } from "./locales/initLocales";
 import intl from "react-intl-universal";
 import LinearProgress from "@mui/material/LinearProgress";
+import { addLike, getAllLikes } from "../../API/likeAPI";
+import { addOneLike, setMyLikes } from "../../store/slices/likesSlice";
+import Post from "@/components/Post";
 
 export default function Home() {
   const dispatch = useDispatch();
-  const { user, isAuth, isOpenAuthModal } = useSelector(
-    (state: RootState) => state.auth
-  );
+  const { user, isAuth } = useSelector((state: RootState) => state.auth);
   const [language, setLanguage] = useState("ru-RU");
 
   const { allPosts } = useSelector((state: RootState) => state.posts);
@@ -55,7 +56,25 @@ export default function Home() {
     }
     start();
   }, []);
-
+  const { myLikes } = useSelector((state: RootState) => state.likes);
+  const getAllLikesHandler = async () => {
+    try {
+      await getAllLikes().then((likes) => dispatch(setMyLikes(likes)));
+    } catch (error) {}
+  };
+  const addLikeHandler = async (uniquePostId: number) => {
+    try {
+      await addLike(uniquePostId, user.id, user.email).then((like) => {
+        dispatch(addOneLike(like));
+        getAllLikesHandler();
+      });
+    } catch (e) {
+      alert("Something went wrong!");
+    }
+  };
+  useEffect(() => {
+    getAllLikesHandler();
+  }, []);
   return (
     <Provider store={store}>
       <Header setLanguage={setLanguage} />
@@ -76,8 +95,17 @@ export default function Home() {
               )}
             </main>
             <Container>
-              {allPosts.map((item, id) => (
-                <CardComponent key={id} post={item} isForAllUsers={true} />
+              {allPosts.map((item: any, id) => (
+                <Post
+                  getAllLikesHandler={getAllLikesHandler}
+                  myLikes={myLikes.filter(
+                    (like) => like.uniquePostId === item.uniquePostId
+                  )}
+                  addLikeHandler={addLikeHandler}
+                  key={id}
+                  post={item}
+                  isForAllUsers={true}
+                />
               ))}
             </Container>
             <div className="footer">

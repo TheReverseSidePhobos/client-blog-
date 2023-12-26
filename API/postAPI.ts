@@ -1,7 +1,7 @@
 import { $authHost, $host } from "./index";
-import jwt_decode from "jwt-decode";
 
 export const createPost = async (
+  uniquePostId: number,
   description: string,
   title: string,
   userId: number,
@@ -10,6 +10,7 @@ export const createPost = async (
   countLikes: number
 ) => {
   const { data } = await $host.post("api/post/create", {
+    uniquePostId,
     description,
     title,
     userId,

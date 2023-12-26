@@ -1,19 +1,33 @@
 import { $authHost, $host } from "./index";
-import jwt_decode from "jwt-decode";
 
 export const addLike = async (
-  postId: number,
+  uniquePostId: number,
   userId: number,
   userEmail: string
 ) => {
   const { data } = await $host.post("api/like/create", {
-    postId,
+    uniquePostId,
     userId,
     userEmail,
   });
+  return data;
 };
-export const getAllLikesByPostId = async (postId: number) => {
-  const { data } = await $host.get("api/like/getAllLikesByPostId/" + postId);
+export const deleteLike = async (uniquePostId: number, userId: number) => {
+  const { data } = await $host.post("api/like/delete", {
+    uniquePostId,
+    userId,
+  });
+  // const { data } = await $authHost.delete("/api/like/" + uniquePostId + userId);
+  return data;
+};
+export const getAllLikes = async () => {
+  const { data } = await $host.get("api/like/getAllLikes");
+  return data;
+};
+export const getAllLikesByPostId = async (uniquePostId: number) => {
+  const { data } = await $host.get(
+    "api/like/getAllLikesByPostId/" + uniquePostId
+  );
 
   return data;
 };

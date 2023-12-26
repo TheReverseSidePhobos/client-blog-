@@ -5,33 +5,25 @@ import { RootState, store } from "../../../store";
 import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
 import {
-  Box,
-  Button,
-  Container,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-  Typography,
-} from "@mui/material";
+  addLike,
+  getAllLikes,
+  getAllLikesByPostId,
+} from "../../../API/likeAPI";
+import { Box, Button, Container, TextField, Typography } from "@mui/material";
 import { useEffect } from "react";
 import { check } from "../../../API/userApi";
 import { setAuth, setUser } from "../../../store/slices/authSlice";
 import { redirect } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { createPost, getAllPostsByUserId } from "../../../API/postAPI";
-
+import { addOneLike, setMyLikes } from "../../../store/slices/likesSlice";
 import CircularProgress from "@mui/material/CircularProgress";
-import CardComponent from "@/components/Post/Post";
-import { BoxColorStyled } from "./styled";
+
 import ColorButtons from "@/components/ColorButtons/ColorButtons";
-import {
-  addOneMyPosts,
-  postState,
-  setMyPosts,
-} from "../../../store/slices/postsSlice";
+import { addOneMyPosts, setMyPosts } from "../../../store/slices/postsSlice";
 import intl from "react-intl-universal";
 import { initLocales } from "../locales/initLocales";
+import Post from "@/components/Post";
 
 // TODO REMOVE ANY
 const Personal = () => {
@@ -88,9 +80,10 @@ const Personal = () => {
 
   const onSub = async (data: any) => {
     const date = new Date();
-
+    const uniquePostId = Math.floor(Math.random() * 10000) + 1;
     try {
       await createPost(
+        uniquePostId,
         data.description,
         data.title,
         user.id,
@@ -142,6 +135,34 @@ const Personal = () => {
     "#163471",
     "#fc8900",
   ];
+  const { myLikes } = useSelector((state: RootState) => state.likes);
+
+  const getAllLikesByPostIdHnadler = async (uniquePostId: number) => {
+    try {
+      await getAllLikesByPostId(uniquePostId).then((likes) =>
+        dispatch(setMyLikes(likes))
+      );
+    } catch (error) {}
+  };
+  const getAllLikesHandler = async () => {
+    try {
+      await getAllLikes().then((likes) => dispatch(setMyLikes(likes)));
+    } catch (error) {}
+  };
+  const addLikeHandler = async (uniquePostId: number) => {
+    try {
+      await addLike(uniquePostId, user.id, user.email).then((like) => {
+        dispatch(addOneLike(like));
+        getAllLikesHandler();
+      });
+    } catch (e) {
+      alert("Something went wrong!");
+    }
+  };
+  React.useEffect(() => {
+    // getAllLikesByPostIdHnadler(post.uniquePostId);
+    getAllLikesHandler();
+  }, []);
 
   return (
     <Provider store={store}>
@@ -156,10 +177,16 @@ const Personal = () => {
             {intl.get("ALL_YOUR_POSTS")}
           </Typography>
           {myPosts &&
-            myPosts.map((item, id) => (
-              <>
-                <CardComponent post={item} />
-              </>
+            myPosts.map((item: any, id) => (
+              <Post
+                key={id}
+                myLikes={myLikes.filter(
+                  (like) => like.uniquePostId === item.uniquePostId
+                )}
+                getAllLikesHandler={getAllLikesHandler}
+                addLikeHandler={addLikeHandler}
+                post={item}
+              />
             ))}
           <form onSubmit={handleSubmit(onSubmit)}>
             <Box display="flex" justifyContent="center" flexDirection="column">
@@ -191,12 +218,10 @@ const Personal = () => {
                     : "type here what you did today"
                 }
               />
-              {dirtyFields.description && (
-                <Typography>dirtyFields.description</Typography>
-              )}
               <Box display="flex">
                 {colorArr.map((item, id) => (
                   <ColorButtons
+                    key={id}
                     setSelectedColor={setSelectedColor}
                     selectedColor={selectedColor}
                     item={item}
