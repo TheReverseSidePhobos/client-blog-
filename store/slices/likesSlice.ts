@@ -16,7 +16,6 @@ const likesSlice = createSlice({
       state.myLikes = action.payload;
     },
     addOneLike: (state, action: PayloadAction<any[]>) => {
-      // state.myLikes = action.payload;
       state.myLikes.push(action.payload);
     },
   },

@@ -4,27 +4,19 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import { Box, Button, IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { deletePost, getAllPostsByUserId } from "../../../../API/postAPI";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import { format } from "date-fns";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../../../store";
 import Tooltip from "@mui/material/Tooltip";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import { format } from "date-fns";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import { deletePost, getAllPostsByUserId } from "../../../../API/postAPI";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../../../store";
 import { setMyPosts } from "../../../../store/slices/postsSlice";
 import { deleteLike } from "../../../../API/likeAPI";
 import { isPreesedLike } from "../lib";
+import PostCard from "@/components/PostCard";
+import { CardComponentProp } from "../model/types";
 
-export interface CardComponentProp {
-  myLikes?: any;
-  post: any;
-  isForAllUsers?: boolean;
-  addLikeHandler?: any;
-  getAllLikesHandler?: any;
-}
-
-// TODO REMOVE ANY
-// TODO REMOVE ADUPLICATE CODE
 export function Post({
   myLikes,
   addLikeHandler,
@@ -33,7 +25,7 @@ export function Post({
   isForAllUsers,
 }: CardComponentProp) {
   const { user, isAuth } = useSelector((state: RootState) => state.auth);
-
+  const [isGettingPosts, setisGettingPosts] = React.useState<boolean>(false);
   const dispatch = useDispatch();
 
   // TODO: Rename
@@ -45,6 +37,8 @@ export function Post({
       });
     } catch (error) {
       alert("Something went wrong!");
+    } finally {
+      setisGettingPosts(false);
     }
   };
 
@@ -66,7 +60,6 @@ export function Post({
   }
 
   const likeClickHandler = (uniquePostId: number, userId: number) => {
-    debugger;
     if (!isPreesedLike(myLikes, user)) {
       addLikeHandler(Number(uniquePostId));
     } else {
@@ -76,46 +69,13 @@ export function Post({
     }
   };
   return (
-    <Card sx={{ backgroundColor: post.color, my: "16px" }}>
-      <CardContent>
-        <Box display="flex" justifyContent="space-between">
-          <Typography gutterBottom variant="h5" component="div">
-            {post.title}
-          </Typography>
-          {!isForAllUsers && (
-            <Button onClick={() => deleteHandler(post)}>
-              <DeleteIcon color="disabled" />
-            </Button>
-          )}
-        </Box>
-        <Typography variant="body2" color="text.secondary">
-          {post.description}
-        </Typography>
-
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Tooltip
-            title={
-              isPreesedLike(myLikes, user) ? "you" : toolTipTitle.join(" and ")
-            }
-          >
-            <IconButton
-              disabled={!isAuth}
-              onClick={() => likeClickHandler(post.uniquePostId, user.id)}
-            >
-              {isPreesedLike(myLikes, user) ? (
-                <FavoriteIcon color="error" />
-              ) : (
-                <FavoriteBorderIcon />
-              )}
-
-              {myLikes.length}
-            </IconButton>
-          </Tooltip>
-          <Typography variant="body2" color="text.secondary">
-            {format(post.dueDate, "dd.MM.yyyy")}
-          </Typography>
-        </Box>
-      </CardContent>
-    </Card>
+    <PostCard
+      likeClickHandler={likeClickHandler}
+      toolTipTitle={toolTipTitle}
+      myLikes={myLikes}
+      post={post}
+      isForAllUsers={isForAllUsers}
+      deleteHandler={deleteHandler}
+    />
   );
 }

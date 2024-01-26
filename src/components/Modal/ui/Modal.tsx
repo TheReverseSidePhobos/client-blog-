@@ -5,31 +5,20 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import Form from "../form/Form";
+import Form from "../../Form/ui/Form";
 import intl from "react-intl-universal";
-
-export interface ModalDialogProp {
-  open: boolean;
-  handleClickOpen: any;
-  handleClose: any;
-}
+import { ModalDialogProp } from "../model/types";
 
 export default function ModalDialog({
   open,
   handleClickOpen,
   handleClose,
 }: ModalDialogProp) {
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState<boolean>(true);
 
   return (
     <>
-      <Dialog
-        fullWidth
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
+      <Dialog fullWidth open={open} onClose={handleClose}>
         <DialogTitle textAlign="center">
           {!isLogin
             ? intl.get("REGISTRATION_FORM_TITLE")

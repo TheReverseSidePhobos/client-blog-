@@ -1,98 +1,73 @@
 "use client";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import { RootState, store } from "../../../store";
-import Header from "@/components/Header/Header";
-import Footer from "@/components/Footer/Footer";
-import {
-  addLike,
-  getAllLikes,
-  getAllLikesByPostId,
-} from "../../../API/likeAPI";
+import Header from "@/components/Header/ui/Header";
+import Footer from "@/components/Footer/ui/Footer";
+import { addLike, getAllLikes } from "../../../API/likeAPI";
 import { Box, Button, Container, TextField, Typography } from "@mui/material";
 import { useEffect } from "react";
 import { check } from "../../../API/userApi";
 import { setAuth, setUser } from "../../../store/slices/authSlice";
 import { redirect } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { createPost, getAllPostsByUserId } from "../../../API/postAPI";
+import { createPost } from "../../../API/postAPI";
 import { addOneLike, setMyLikes } from "../../../store/slices/likesSlice";
 import CircularProgress from "@mui/material/CircularProgress";
-
-import ColorButtons from "@/components/ColorButtons/ColorButtons";
-import { addOneMyPosts, setMyPosts } from "../../../store/slices/postsSlice";
+import ColorButtons from "@/components/ColorButtons/ui/ColorButtons";
+import { addOneMyPosts } from "../../../store/slices/postsSlice";
 import intl from "react-intl-universal";
 import { initLocales } from "../locales/initLocales";
 import Post from "@/components/Post";
+import { DEFAULT_COLOR, RUSSIAN, colors } from "../constants";
+import DropzoneComponent from "@/components/Dropzone/ui/DropzoneComponent";
+import { getLNG, getPostsByUserId, makeFormDataPost } from "../utils";
 
 // TODO REMOVE ANY
 const Personal = () => {
-  const [language, setLanguage] = useState("ru-RU");
-  initLocales(language);
-  useEffect(() => {
-    const lng = localStorage.getItem("lng");
-
-    if (lng) {
-      setLanguage(lng);
-    } else {
-      setLanguage("ru-RU");
-    }
-    initLocales(language);
-  }, []);
-  const { user, isAuth, isOpenAuthModal } = useSelector(
-    (state: RootState) => state.auth
-  );
+  const [language, setLanguage] = useState<string>(RUSSIAN);
+  const { user, isAuth } = useSelector((state: RootState) => state.auth);
   const { myPosts } = useSelector((state: RootState) => state.posts);
-
+  const [file, setFile] = useState<object | null>(null);
   const dispatch = useDispatch();
-  const [isGettingPosts, setisGettingPosts] = React.useState(false);
+  const [isGettingPosts, setisGettingPosts] = useState<boolean>(false);
+  const [selectedColor, setSelectedColor] = useState<string>(DEFAULT_COLOR);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { myLikes } = useSelector((state: RootState) => state.likes);
+  const filePickerRef = useRef<HTMLInputElement>(null);
+  initLocales(language);
 
-  const func = async () => {
-    try {
-      await getAllPostsByUserId(user.id).then((items) => {
-        const myPosts = items.filter((item: any) => item.userId === user.id);
-        dispatch(setMyPosts(myPosts));
-      });
-    } catch (error) {
-      alert("Something went wrong!");
-    } finally {
-      setisGettingPosts(false);
-    }
-  };
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { isDirty, dirtyFields, touchedFields, errors },
+  } = useForm({
+    defaultValues: {
+      title: "",
+      description: "",
+    },
+  });
 
-  useEffect(() => {
-    if (localStorage.getItem("userToken") || isAuth) {
-      func();
-    } else {
-      redirect("/");
-    }
-  }, [isAuth]);
+  const title = watch("title");
+  const description = watch("description");
 
-  useEffect(() => {
-    if (localStorage.getItem("userToken")) {
-      check().then((data) => {
-        dispatch(setUser(data));
-        dispatch(setAuth(true));
-      });
-    }
-  }, []);
-  const [selectedColor, setSelectedColor] = useState("#f1e7c5");
-
-  const onSub = async (data: any) => {
+  const onSubmit = async (data: any) => {
     const date = new Date();
     const uniquePostId = Math.floor(Math.random() * 10000) + 1;
+    const formData = makeFormDataPost(
+      data,
+      date,
+      uniquePostId,
+      user,
+      file,
+      selectedColor
+    );
     try {
-      await createPost(
-        uniquePostId,
-        data.description,
-        data.title,
-        user.id,
-        date,
-        selectedColor,
-        0
-      ).then((newPost) => {
+      await createPost(formData).then((newPost) => {
         dispatch(addOneMyPosts(newPost));
-        func();
+        getPostsByUserId(setisGettingPosts, dispatch, user);
       });
     } catch (e) {
       console.log(e);
@@ -102,48 +77,6 @@ const Personal = () => {
     }
   };
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    reset,
-
-    formState: { isDirty, dirtyFields, touchedFields, errors },
-  } = useForm({
-    defaultValues: {
-      title: "",
-      description: "",
-    },
-  });
-  const title = watch("title");
-  const description = watch("description");
-  const onSubmit = (data: any) => {
-    onSub(data);
-  };
-
-  const colorArr = [
-    "#f1e7c5",
-    "#f0c3b9",
-    "#bfefc5",
-    "#b4d4ee",
-    "#e9e88e",
-    "#179c98",
-    "#ea98d6",
-    "#cacaca",
-    "#16bb44",
-    "#ea200b",
-    "#163471",
-    "#fc8900",
-  ];
-  const { myLikes } = useSelector((state: RootState) => state.likes);
-
-  const getAllLikesByPostIdHnadler = async (uniquePostId: number) => {
-    try {
-      await getAllLikesByPostId(uniquePostId).then((likes) =>
-        dispatch(setMyLikes(likes))
-      );
-    } catch (error) {}
-  };
   const getAllLikesHandler = async () => {
     try {
       await getAllLikes().then((likes) => dispatch(setMyLikes(likes)));
@@ -159,19 +92,51 @@ const Personal = () => {
       alert("Something went wrong!");
     }
   };
-  React.useEffect(() => {
-    // getAllLikesByPostIdHnadler(post.uniquePostId);
+
+  const handleChangeFile = (e: any) => {
+    setFile(e.target.files[0]);
+  };
+
+  const handleDownloadClick = () => {
+    if (filePickerRef.current) {
+      filePickerRef?.current.click();
+    }
+  };
+
+  useEffect(() => {
+    if (localStorage.getItem("userToken") || isAuth) {
+      getPostsByUserId(setisGettingPosts, dispatch, user);
+    } else {
+      redirect("/");
+    }
+  }, [isAuth]);
+
+  useEffect(() => {
+    if (localStorage.getItem("userToken")) {
+      check().then((data) => {
+        dispatch(setUser(data));
+        dispatch(setAuth(true));
+      });
+    }
+
     getAllLikesHandler();
+
+    getLNG(language, setLanguage);
   }, []);
 
   return (
     <Provider store={store}>
-      <Header />
+      <Header
+        isLoading={isLoading}
+        language={language}
+        setLanguage={setLanguage}
+      />
+
       <Box className="wrapper">
         <Container>
-          <h2 style={{ marginTop: "24px", textAlign: "center" }}>
+          <Typography typography="h6" textAlign="center" mt={3}>
             {intl.get("PERSONAL_AREA")}
-          </h2>
+          </Typography>
           {isGettingPosts && <CircularProgress />}
           <Typography textAlign="center">
             {intl.get("ALL_YOUR_POSTS")}
@@ -219,7 +184,7 @@ const Personal = () => {
                 }
               />
               <Box display="flex">
-                {colorArr.map((item, id) => (
+                {colors.map((item, id) => (
                   <ColorButtons
                     key={id}
                     setSelectedColor={setSelectedColor}
@@ -228,7 +193,11 @@ const Personal = () => {
                   />
                 ))}
               </Box>
-
+              <DropzoneComponent
+                filePickerRef={filePickerRef}
+                handleChangeFile={handleChangeFile}
+                handleDownloadClick={handleDownloadClick}
+              />
               <Button
                 disabled={!title || !description}
                 onClick={() => {

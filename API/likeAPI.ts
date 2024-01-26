@@ -1,4 +1,4 @@
-import { $authHost, $host } from "./index";
+import { $host } from "./index";
 
 export const addLike = async (
   uniquePostId: number,
@@ -17,7 +17,6 @@ export const deleteLike = async (uniquePostId: number, userId: number) => {
     uniquePostId,
     userId,
   });
-  // const { data } = await $authHost.delete("/api/like/" + uniquePostId + userId);
   return data;
 };
 export const getAllLikes = async () => {

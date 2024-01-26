@@ -5,7 +5,7 @@ const locales = {
   "en-US": require("./en-US.json"),
 };
 
-export const initLocales = (name): void => {
+export const initLocales = (name: string): void => {
   intl.init({
     currentLocale: name,
     locales,

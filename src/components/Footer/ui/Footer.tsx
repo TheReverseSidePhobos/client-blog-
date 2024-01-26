@@ -1,27 +1,22 @@
 import React, { FC, ReactElement } from "react";
-import { Box, Container, Grid, Typography } from "@mui/material";
+import { Container, Grid, Typography } from "@mui/material";
+import intl from "react-intl-universal";
+import { BoxFooterStyled } from "./styled";
+import { NOW } from "@/app/constants";
 
 export const Footer: FC = (): ReactElement => {
   return (
-    <Box
-      sx={{
-        width: "100%",
-        height: "auto",
-        backgroundColor: "primary.main",
-        paddingTop: "1rem",
-        paddingBottom: "1rem",
-      }}
-    >
+    <BoxFooterStyled bgcolor="primary.main" mt={2}>
       <Container maxWidth="lg">
         <Grid container direction="column" alignItems="center">
           <Grid item xs={12}>
             <Typography color="black" variant="body1">
-              Blog {new Date().getFullYear()}
+              {intl.get("BLOG")} {NOW.getFullYear()}
             </Typography>
           </Grid>
         </Grid>
       </Container>
-    </Box>
+    </BoxFooterStyled>
   );
 };
 

@@ -26,6 +26,7 @@
     "next": "13.4.19",
     "npm": "^10.2.5",
     "react": "^18.2.0",
+    "react-bootstrap": "^2.10.0",
     "react-dom": "18.2.0",
     "react-dropzone": "^14.2.3",
     "react-hook-form": "^7.48.2",

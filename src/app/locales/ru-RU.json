@@ -14,5 +14,9 @@
     "SUBMIT": "Отправить",
     "GO_TO_REG": "Перейти на регистрацию",
     "ALREADY_HAVE_ACC": "Уже зарегистрированы?",
-    "ALL_YOUR_POSTS": "Все ваши посты"
+    "ALL_YOUR_POSTS": "Все ваши посты",
+    "DOWNLOAD_FILE": "Загрузить файл",
+    "BLOG": "Блог",
+    "LANGUAGE_RU": "Русский",
+    "LANGUAGE_ENG": "Английский"
 }

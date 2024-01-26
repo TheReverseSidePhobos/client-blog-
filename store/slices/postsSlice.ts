@@ -30,8 +30,6 @@ const postsSlice = createSlice({
       state.myPosts = action.payload;
     },
     addOneMyPosts: (state, action: PayloadAction<postState>) => {
-      // state.allPosts = action.payload;
-
       [...state.myPosts].push(action.payload);
     },
   },

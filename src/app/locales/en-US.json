@@ -14,5 +14,9 @@
     "SUBMIT": "Submit",
     "GO_TO_REG": "Go to registration",
     "ALREADY_HAVE_ACC": "Already have an acc?",
-    "ALL_YOUR_POSTS": "ALL YOUR POSTS"
+    "ALL_YOUR_POSTS": "ALL YOUR POSTS",
+    "DOWNLOAD_FILE": "Download file",
+    "BLOG": "Blog",
+    "LANGUAGE_RU": "Russian",
+    "LANGUAGE_ENG": "Engish"
 }

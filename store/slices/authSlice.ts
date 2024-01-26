@@ -1,17 +1,16 @@
+import { UserProp } from "@/components/Header/model/types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface authState {
   user: any;
   isAuth: boolean;
   isOpenAuthModal: boolean;
-  basketDevices: any;
 }
 
 const initialState: authState = {
   user: {},
   isAuth: false,
   isOpenAuthModal: false,
-  basketDevices: null,
 };
 
 const authSlice = createSlice({
@@ -21,19 +20,15 @@ const authSlice = createSlice({
     setAuth: (state, action: PayloadAction<boolean>) => {
       state.isAuth = action.payload;
     },
-    setUser: (state, action) => {
+    setUser: (state, action: PayloadAction<any>) => {
       state.user = action.payload;
     },
-    setOpenAuth: (state, action) => {
+    setOpenAuth: (state, action: PayloadAction<boolean>) => {
       state.isOpenAuthModal = action.payload;
-    },
-    setBasketDevicesToStore: (state, action) => {
-      state.basketDevices = action.payload;
     },
   },
 });
 
-export const { setAuth, setUser, setOpenAuth, setBasketDevicesToStore } =
-  authSlice.actions;
+export const { setAuth, setUser, setOpenAuth } = authSlice.actions;
 
 export default authSlice.reducer;
