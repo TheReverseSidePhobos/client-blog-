@@ -27,7 +27,7 @@ const PostCard = ({
   const { user, isAuth } = useSelector((state: RootState) => state.auth);
   const [userMadePostData, setUserMadePostData] =
     React.useState<userMadePostDataProp | null>(null);
-
+  console.log("myLikes from post: ", myLikes);
   const getUserWhoMadePost = async (userId: any) => {
     try {
       await getUserById(userId).then((userData) => {
@@ -91,7 +91,7 @@ const PostCard = ({
                 <FavoriteBorderIcon />
               )}
 
-              {myLikes.length}
+              {myLikes && myLikes.length}
             </IconButton>
           </Tooltip>
         </Box>

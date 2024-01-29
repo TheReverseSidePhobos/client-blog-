@@ -18,5 +18,6 @@
     "DOWNLOAD_FILE": "Загрузить файл",
     "BLOG": "Блог",
     "LANGUAGE_RU": "Русский",
-    "LANGUAGE_ENG": "Английский"
+    "LANGUAGE_ENG": "Английский",
+    "SOMTHING_WENT_WRONG": "Сударь, нам жаль, что-то пошло не так :("
 }
