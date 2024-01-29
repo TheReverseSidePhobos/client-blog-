@@ -14,16 +14,25 @@ import intl from "react-intl-universal";
 import LinearProgress from "@mui/material/LinearProgress";
 
 import Post from "@/components/Post";
-import { addLikeHandler, getAllLikesHandler, getLNG, start } from "./utils";
+import { addLikeHandler, fetcher, getAllLikesHandler, getLNG } from "./utils";
 import { RUSSIAN } from "./constants";
+import useSWR from "swr";
+import { setAllPosts } from "../../store/slices/postsSlice";
+import { setMyLikes } from "../../store/slices/likesSlice";
+
+interface likeProp {
+  id: number;
+  postId?: number;
+  uniquePostId: number;
+  userEmail: string;
+  userId: number;
+}
 
 export default function Home() {
   const dispatch = useDispatch();
   const { user, isAuth } = useSelector((state: RootState) => state.auth);
-  const { allPosts } = useSelector((state: RootState) => state.posts);
   const { myLikes } = useSelector((state: RootState) => state.likes);
   const [language, setLanguage] = useState<string>(RUSSIAN);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   initLocales(language);
 
   useEffect(() => {
@@ -32,7 +41,6 @@ export default function Home() {
 
   useEffect(() => {
     if (localStorage.getItem("userToken")) {
-      setIsLoading(true);
       check()
         .then((data) => {
           dispatch(setUser(data));
@@ -41,12 +49,43 @@ export default function Home() {
         .catch(() => console.log("unauthorized"))
         .finally(() => {});
     }
-    start(dispatch, setIsLoading);
   }, []);
 
+  const {
+    data: postData,
+    error,
+    isLoading,
+  } = useSWR("api/post/getAllPosts", fetcher);
+
+  const { data: allLikesData, error: likesError } = useSWR(
+    "api/like/getAllLikes",
+    fetcher
+  );
+
   useEffect(() => {
-    getAllLikesHandler(dispatch);
-  }, []);
+    if (postData) {
+      dispatch(setAllPosts(postData));
+    }
+    if (allLikesData) {
+      dispatch(setMyLikes(allLikesData));
+    }
+  }, [postData, allLikesData]);
+  if (error) {
+    return (
+      <Typography textAlign="center" typography="subtitle1">
+        {intl.get("SOMTHING_WENT_WRONG")}
+      </Typography>
+    );
+  }
+  if (isLoading) {
+    return (
+      <Container>
+        <Box marginTop="20%">
+          <LinearProgress />
+        </Box>
+      </Container>
+    );
+  }
   return (
     <Provider store={store}>
       <Header
@@ -55,45 +94,41 @@ export default function Home() {
         setLanguage={setLanguage}
       />
       <Box className="wrapper">
-        {isLoading ? (
-          <Container>
-            <Box marginTop="20%">
-              <LinearProgress />
-            </Box>
-          </Container>
-        ) : (
-          <>
-            <Box>
-              <Typography textAlign="center" typography="h6">
-                {intl.get("MAIN_TITLE")}
-              </Typography>
-              {!isAuth && isLoading && (
-                <Typography typography="body" textAlign="center" mt={3}>
-                  {intl.get("PLEASE_LOGIN")}
-                </Typography>
-              )}
-            </Box>
-            <Container>
-              {allPosts.map((item: any, id) => (
-                <Post
-                  getAllLikesHandler={() => getAllLikesHandler(dispatch)}
-                  myLikes={myLikes.filter(
-                    (like) => like.uniquePostId === item.uniquePostId
-                  )}
-                  addLikeHandler={() =>
-                    addLikeHandler(item.uniquePostId, user, dispatch)
-                  }
-                  key={id}
-                  post={item}
-                  isForAllUsers={true}
-                />
-              ))}
-            </Container>
-            <div className="footer">
-              <Footer />
-            </div>
-          </>
-        )}
+        (
+        <Box>
+          <Typography textAlign="center" typography="h6">
+            {intl.get("MAIN_TITLE")}
+          </Typography>
+          {!isAuth && isLoading && (
+            <Typography typography="body" textAlign="center" mt={3}>
+              {intl.get("PLEASE_LOGIN")}
+            </Typography>
+          )}
+        </Box>
+        <Container>
+          {postData &&
+            postData.map((item: any, id: number) => (
+              <Post
+                getAllLikesHandler={() => getAllLikesHandler(dispatch)}
+                myLikes={
+                  myLikes &&
+                  myLikes.filter(
+                    (like: likeProp) => like.uniquePostId === item.uniquePostId
+                  )
+                }
+                addLikeHandler={() =>
+                  addLikeHandler(item.uniquePostId, user, dispatch)
+                }
+                key={id}
+                post={item}
+                isForAllUsers={true}
+              />
+            ))}
+        </Container>
+        <div className="footer">
+          <Footer />
+        </div>
+        )
       </Box>
     </Provider>
   );

@@ -7,23 +7,9 @@ import { setMyPosts } from "../../store/slices/postsSlice";
 import { NULL, RUSSIAN } from "./constants";
 import { initLocales } from "./locales/initLocales";
 import { UserProp } from "@/components/Header/model/types";
+import { $host } from "../../API";
 
-export const start = async (
-  dispatch: any,
-  setIsLoading: (isLoading: boolean) => void
-) => {
-  try {
-    setIsLoading(true);
-
-    await getAllPosts().then((posts) => {
-      dispatch(setAllPosts(posts));
-    });
-  } catch (error) {
-    alert("Something went wrong!");
-  } finally {
-    setIsLoading(false);
-  }
-};
+export const fetcher = (url: string) => $host.get(url).then((res) => res.data);
 
 export const getAllLikesHandler = async (dispatch: any) => {
   try {
