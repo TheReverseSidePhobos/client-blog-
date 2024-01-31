@@ -33,14 +33,14 @@ import { $host } from "../../../API";
 const Personal = () => {
   const [language, setLanguage] = useState<string>(RUSSIAN);
   const { user, isAuth } = useSelector((state: RootState) => state.auth);
-
+  const [dropzoneFile, setDropzoneFile] = useState(null);
   const [file, setFile] = useState<object | null>(null);
   const dispatch = useDispatch();
 
   const [selectedColor, setSelectedColor] = useState<string>(DEFAULT_COLOR);
 
   const { myLikes } = useSelector((state: RootState) => state.likes);
-  const filePickerRef = useRef<HTMLInputElement>(null);
+
   initLocales(language);
   const queryClient = useQueryClient();
   const {
@@ -58,17 +58,15 @@ const Personal = () => {
 
   const title = watch("title");
   const description = watch("description");
-  console.log("iser: ", user);
 
   async function createPo(post: any) {
-    debugger;
     const { data } = await $host.post("api/post/create", post);
     return data;
   }
 
   const { error, data: allPostsById } = useQuery(
     "postssById",
-    () => getAllPosts(),
+    () => getAllPostsByUserId(user.id | Number(localStorage.getItem("userId"))),
     {
       refetchOnMount: true,
       staleTime: 100,
@@ -78,7 +76,7 @@ const Personal = () => {
   const mutation = useMutation((newPost) => createPo(newPost), {
     onSuccess: () => queryClient.invalidateQueries("postssById"),
   });
-  console.log("allPostsById: ", allPostsById);
+
   const onSubmit = async (data: any) => {
     const date = new Date();
     const uniquePostId = Math.floor(Math.random() * 10000) + 1;
@@ -87,10 +85,12 @@ const Personal = () => {
       date,
       uniquePostId,
       user,
-      file,
+      dropzoneFile,
       selectedColor
     ) as any;
     mutation.mutate(formData);
+    reset();
+    setDropzoneFile(null);
   };
 
   const getAllLikesHandler = async () => {
@@ -106,16 +106,6 @@ const Personal = () => {
       });
     } catch (e) {
       alert("Something went wrong!");
-    }
-  };
-
-  const handleChangeFile = (e: any) => {
-    setFile(e.target.files[0]);
-  };
-
-  const handleDownloadClick = () => {
-    if (filePickerRef.current) {
-      filePickerRef?.current.click();
     }
   };
 
@@ -188,7 +178,7 @@ const Personal = () => {
                     : "type here what you did today"
                 }
               />
-              <Box display="flex">
+              <Box display="flex" justifyContent="space-around">
                 {colors.map((item, id) => (
                   <ColorButtons
                     key={id}
@@ -197,14 +187,14 @@ const Personal = () => {
                     item={item}
                   />
                 ))}
+
+                <DropzoneComponent
+                  setDropzoneFile={setDropzoneFile}
+                  dropzoneFile={dropzoneFile}
+                />
               </Box>
-              <DropzoneComponent
-                filePickerRef={filePickerRef}
-                handleChangeFile={handleChangeFile}
-                handleDownloadClick={handleDownloadClick}
-              />
               <Button
-                disabled={!title || !description}
+                disabled={!title || !description || !dropzoneFile}
                 sx={{ my: "10px" }}
                 color="success"
                 variant="contained"

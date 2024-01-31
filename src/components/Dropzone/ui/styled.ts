@@ -10,8 +10,20 @@ export const BoxHideenStyled = styled(Box)(() => ({
 }));
 
 export const ButtonDownloadStyled = styled(Button)(() => ({
-  width: "200px",
+  width: "100%",
   "&:hover": {
     cursor: "pointer",
   },
+}));
+
+export const BoxFileNameStyled = styled(Box)(({ theme }) => ({
+  backgroundColor: theme.palette.divider,
+  margin: theme.spacing(1, 0, 1, 0),
+}));
+
+export const BoxDropzoneStyled = styled(Box)(({ theme }) => ({
+  border: `1px solid ${theme.palette.divider}`,
+
+  display: "flex",
+  justifyContent: "center",
 }));

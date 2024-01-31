@@ -19,5 +19,6 @@
     "BLOG": "Blog",
     "LANGUAGE_RU": "Russian",
     "LANGUAGE_ENG": "Engish",
-    "SOMTHING_WENT_WRONG": "Something went wrong"
+    "SOMTHING_WENT_WRONG": "Something went wrong",
+    "DROP_FILE_HERE": "Drop the files here"
 }

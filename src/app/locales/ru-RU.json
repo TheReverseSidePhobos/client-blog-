@@ -19,5 +19,6 @@
     "BLOG": "Блог",
     "LANGUAGE_RU": "Русский",
     "LANGUAGE_ENG": "Английский",
-    "SOMTHING_WENT_WRONG": "Сударь, нам жаль, что-то пошло не так :("
+    "SOMTHING_WENT_WRONG": "Сударь, нам жаль, что-то пошло не так :(",
+    "DROP_FILE_HERE": "Положите файл сюда"
 }

@@ -15,6 +15,7 @@ import { addLikeHandler, getAllLikesHandler, getLNG } from "./utils";
 import { RUSSIAN } from "./constants";
 import { useQuery } from "react-query";
 import { getAllPosts } from "../../API/postAPI";
+import { UserProp } from "@/components/Header/model/types";
 
 interface likeProp {
   id: number;
@@ -46,9 +47,10 @@ export default function Home() {
   useEffect(() => {
     if (localStorage.getItem("userToken")) {
       check()
-        .then((data) => {
+        .then((data: UserProp | any) => {
           dispatch(setUser(data));
           dispatch(setAuth(true));
+          localStorage.setItem("userId", String(data.id));
         })
         .catch(() => console.log("unauthorized"))
         .finally(() => {});
