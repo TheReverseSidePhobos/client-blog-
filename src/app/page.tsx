@@ -6,19 +6,15 @@ import Footer from "@/components/Footer/ui/Footer";
 import { useEffect, useState } from "react";
 import { check } from "../../API/userApi";
 import { setAuth, setUser } from "../../store/slices/authSlice";
-
 import { Box, Container, Typography } from "@mui/material";
-
 import { initLocales } from "./locales/initLocales";
 import intl from "react-intl-universal";
 import LinearProgress from "@mui/material/LinearProgress";
-
 import Post from "@/components/Post";
-import { addLikeHandler, fetcher, getAllLikesHandler, getLNG } from "./utils";
+import { addLikeHandler, getAllLikesHandler, getLNG } from "./utils";
 import { RUSSIAN } from "./constants";
-import useSWR from "swr";
-import { setAllPosts } from "../../store/slices/postsSlice";
-import { setMyLikes } from "../../store/slices/likesSlice";
+import { useQuery } from "react-query";
+import { getAllPosts } from "../../API/postAPI";
 
 interface likeProp {
   id: number;
@@ -33,6 +29,14 @@ export default function Home() {
   const { user, isAuth } = useSelector((state: RootState) => state.auth);
   const { myLikes } = useSelector((state: RootState) => state.likes);
   const [language, setLanguage] = useState<string>(RUSSIAN);
+
+  const {
+    isLoading,
+    error,
+    data: allPosts,
+  } = useQuery("allPost", getAllPosts, {
+    keepPreviousData: true,
+  });
   initLocales(language);
 
   useEffect(() => {
@@ -50,64 +54,40 @@ export default function Home() {
         .finally(() => {});
     }
   }, []);
-
-  const {
-    data: postData,
-    error,
-    isLoading,
-  } = useSWR("api/post/getAllPosts", fetcher);
-
-  const { data: allLikesData, error: likesError } = useSWR(
-    "api/like/getAllLikes",
-    fetcher
-  );
-
   useEffect(() => {
-    if (postData) {
-      dispatch(setAllPosts(postData));
-    }
-    if (allLikesData) {
-      dispatch(setMyLikes(allLikesData));
-    }
-  }, [postData, allLikesData]);
+    getAllLikesHandler(dispatch);
+  }, []);
+
   if (error) {
     return (
-      <Typography textAlign="center" typography="subtitle1">
+      <Typography typography="subtitle1" textAlign="center">
         {intl.get("SOMTHING_WENT_WRONG")}
       </Typography>
     );
   }
-  if (isLoading) {
-    return (
-      <Container>
-        <Box marginTop="20%">
-          <LinearProgress />
-        </Box>
-      </Container>
-    );
-  }
+
   return (
     <Provider store={store}>
-      <Header
-        isLoading={isLoading}
-        language={language}
-        setLanguage={setLanguage}
-      />
-      <Box className="wrapper">
-        (
-        <Box>
-          <Typography textAlign="center" typography="h6">
-            {intl.get("MAIN_TITLE")}
-          </Typography>
-          {!isAuth && isLoading && (
-            <Typography typography="body" textAlign="center" mt={3}>
-              {intl.get("PLEASE_LOGIN")}
-            </Typography>
-          )}
+      <Header isLoading={false} language={language} setLanguage={setLanguage} />
+      {isLoading ? (
+        <Box mt={36}>
+          <LinearProgress />
         </Box>
-        <Container>
-          {postData &&
-            postData.map((item: any, id: number) => (
+      ) : (
+        <Box className="wrapper">
+          (
+          <Box>
+            <Typography textAlign="center" typography="h6">
+              {intl.get("MAIN_TITLE")}
+            </Typography>
+            {!isAuth && isLoading && (
+              <Typography typography="body" textAlign="center" mt={3}>
+                {intl.get("PLEASE_LOGIN")}
+              </Typography>
+            )}
+          </Box>
+          <Container>
+            {allPosts.map((item: any, id: number) => (
               <Post
                 getAllLikesHandler={() => getAllLikesHandler(dispatch)}
                 myLikes={
@@ -124,12 +104,13 @@ export default function Home() {
                 isForAllUsers={true}
               />
             ))}
-        </Container>
-        <div className="footer">
-          <Footer />
-        </div>
-        )
-      </Box>
+          </Container>
+          <div className="footer">
+            <Footer />
+          </div>
+          )
+        </Box>
+      )}
     </Provider>
   );
 }

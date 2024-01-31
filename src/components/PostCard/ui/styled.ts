@@ -5,6 +5,7 @@ interface CardStyledStyledProp {
 }
 export const CardStyled = styled(Card)(
   ({ postColor }: CardStyledStyledProp) => ({
+    border: "5px solid gray",
     backgroundColor: postColor,
     marginTop: "16px",
   })

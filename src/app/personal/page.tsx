@@ -11,7 +11,11 @@ import { check } from "../../../API/userApi";
 import { setAuth, setUser } from "../../../store/slices/authSlice";
 import { redirect } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { createPost } from "../../../API/postAPI";
+import {
+  createPost,
+  getAllPosts,
+  getAllPostsByUserId,
+} from "../../../API/postAPI";
 import { addOneLike, setMyLikes } from "../../../store/slices/likesSlice";
 import CircularProgress from "@mui/material/CircularProgress";
 import ColorButtons from "@/components/ColorButtons/ui/ColorButtons";
@@ -22,21 +26,23 @@ import Post from "@/components/Post";
 import { DEFAULT_COLOR, RUSSIAN, colors } from "../constants";
 import DropzoneComponent from "@/components/Dropzone/ui/DropzoneComponent";
 import { getLNG, getPostsByUserId, makeFormDataPost } from "../utils";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import { $host } from "../../../API";
 
 // TODO REMOVE ANY
 const Personal = () => {
   const [language, setLanguage] = useState<string>(RUSSIAN);
   const { user, isAuth } = useSelector((state: RootState) => state.auth);
-  const { myPosts } = useSelector((state: RootState) => state.posts);
+
   const [file, setFile] = useState<object | null>(null);
   const dispatch = useDispatch();
-  const [isGettingPosts, setisGettingPosts] = useState<boolean>(false);
+
   const [selectedColor, setSelectedColor] = useState<string>(DEFAULT_COLOR);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   const { myLikes } = useSelector((state: RootState) => state.likes);
   const filePickerRef = useRef<HTMLInputElement>(null);
   initLocales(language);
-
+  const queryClient = useQueryClient();
   const {
     register,
     handleSubmit,
@@ -52,7 +58,27 @@ const Personal = () => {
 
   const title = watch("title");
   const description = watch("description");
+  console.log("iser: ", user);
 
+  async function createPo(post: any) {
+    debugger;
+    const { data } = await $host.post("api/post/create", post);
+    return data;
+  }
+
+  const { error, data: allPostsById } = useQuery(
+    "postssById",
+    () => getAllPosts(),
+    {
+      refetchOnMount: true,
+      staleTime: 100,
+    }
+  );
+
+  const mutation = useMutation((newPost) => createPo(newPost), {
+    onSuccess: () => queryClient.invalidateQueries("postssById"),
+  });
+  console.log("allPostsById: ", allPostsById);
   const onSubmit = async (data: any) => {
     const date = new Date();
     const uniquePostId = Math.floor(Math.random() * 10000) + 1;
@@ -63,18 +89,8 @@ const Personal = () => {
       user,
       file,
       selectedColor
-    );
-    try {
-      await createPost(formData).then((newPost) => {
-        dispatch(addOneMyPosts(newPost));
-        getPostsByUserId(setisGettingPosts, dispatch, user);
-      });
-    } catch (e) {
-      console.log(e);
-      alert("Something went wrong!");
-    } finally {
-      reset();
-    }
+    ) as any;
+    mutation.mutate(formData);
   };
 
   const getAllLikesHandler = async () => {
@@ -104,14 +120,6 @@ const Personal = () => {
   };
 
   useEffect(() => {
-    if (localStorage.getItem("userToken") || isAuth) {
-      getPostsByUserId(setisGettingPosts, dispatch, user);
-    } else {
-      redirect("/");
-    }
-  }, [isAuth]);
-
-  useEffect(() => {
     if (localStorage.getItem("userToken")) {
       check().then((data) => {
         dispatch(setUser(data));
@@ -126,33 +134,30 @@ const Personal = () => {
 
   return (
     <Provider store={store}>
-      <Header
-        isLoading={isLoading}
-        language={language}
-        setLanguage={setLanguage}
-      />
+      <Header language={language} setLanguage={setLanguage} />
 
       <Box className="wrapper">
         <Container>
           <Typography typography="h6" textAlign="center" mt={3}>
             {intl.get("PERSONAL_AREA")}
           </Typography>
-          {isGettingPosts && <CircularProgress />}
           <Typography textAlign="center">
             {intl.get("ALL_YOUR_POSTS")}
           </Typography>
-          {myPosts &&
-            myPosts.map((item: any, id) => (
-              <Post
-                key={id}
-                myLikes={myLikes.filter(
-                  (like) => like.uniquePostId === item.uniquePostId
-                )}
-                getAllLikesHandler={getAllLikesHandler}
-                addLikeHandler={addLikeHandler}
-                post={item}
-              />
-            ))}
+          {allPostsById &&
+            allPostsById
+              .filter((item: any) => item.userId === user.id)
+              .map((item: any, id: any) => (
+                <Post
+                  key={id}
+                  myLikes={myLikes.filter(
+                    (like) => like.uniquePostId === item.uniquePostId
+                  )}
+                  getAllLikesHandler={getAllLikesHandler}
+                  addLikeHandler={addLikeHandler}
+                  post={item}
+                />
+              ))}
           <form onSubmit={handleSubmit(onSubmit)}>
             <Box display="flex" justifyContent="center" flexDirection="column">
               <TextField
@@ -200,9 +205,6 @@ const Personal = () => {
               />
               <Button
                 disabled={!title || !description}
-                onClick={() => {
-                  setisGettingPosts(true);
-                }}
                 sx={{ my: "10px" }}
                 color="success"
                 variant="contained"
