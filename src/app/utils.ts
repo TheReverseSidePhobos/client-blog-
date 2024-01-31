@@ -1,4 +1,3 @@
-import { getAllPosts } from "../../API/postAPI";
 import { setAllPosts } from "../../store/slices/postsSlice";
 import { addLike, getAllLikes } from "../../API/likeAPI";
 import { addOneLike, setMyLikes } from "../../store/slices/likesSlice";
@@ -7,9 +6,6 @@ import { setMyPosts } from "../../store/slices/postsSlice";
 import { NULL, RUSSIAN } from "./constants";
 import { initLocales } from "./locales/initLocales";
 import { UserProp } from "@/components/Header/model/types";
-import { $host } from "../../API";
-
-export const fetcher = (url: string) => $host.get(url).then((res) => res.data);
 
 export const getAllLikesHandler = async (dispatch: any) => {
   try {

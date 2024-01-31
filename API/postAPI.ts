@@ -5,14 +5,16 @@ export const createPost = async (post: any) => {
   return data;
 };
 
-export const getAllPostsByUserId = async (userId: number) => {
-  const { data } = await $host.get("api/post/getAllByUserId/" + userId);
-  return data;
-};
 export const getAllPosts = async () => {
   const { data } = await $host.get("api/post/getAllPosts");
   return data;
 };
+
+export const getAllPostsByUserId = async (userId: number) => {
+  const { data } = await $host.get("api/post/getAllByUserId/" + userId);
+  return data;
+};
+
 export const deletePost = async (id: number) => {
   const { data } = await $authHost.delete("/api/post/" + id);
   return data;
