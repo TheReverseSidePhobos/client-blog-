@@ -9,11 +9,7 @@ import Form from "../../Form/ui/Form";
 import intl from "react-intl-universal";
 import { ModalDialogProp } from "../model/types";
 
-export default function ModalDialog({
-  open,
-  handleClickOpen,
-  handleClose,
-}: ModalDialogProp) {
+export default function ModalDialog({ open, handleClose }: ModalDialogProp) {
   const [isLogin, setIsLogin] = useState<boolean>(true);
 
   return (

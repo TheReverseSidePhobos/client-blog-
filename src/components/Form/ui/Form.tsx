@@ -1,7 +1,6 @@
 "use client";
 import { useForm } from "react-hook-form";
 import TextField from "@mui/material/TextField";
-import { Box, Button } from "@mui/material";
 import { registration, login } from "../../../../API/userApi";
 import { useDispatch } from "react-redux";
 import { setAuth, setUser } from "../../../../store/slices/authSlice";
@@ -13,16 +12,7 @@ import {
   ButtonChangeModalStyled,
   ButtonSubmitStyled,
 } from "./styled";
-
-export interface FormProp {
-  handleClose: any;
-  isLogin: boolean;
-  setIsLogin: (isLogin: boolean) => void;
-}
-export interface dataProp {
-  email: string;
-  password: string;
-}
+import { FormProp, dataProp } from "../lib/types";
 
 const Form = ({ handleClose, isLogin, setIsLogin }: FormProp) => {
   const dispatch = useDispatch();
@@ -46,7 +36,6 @@ const Form = ({ handleClose, isLogin, setIsLogin }: FormProp) => {
   };
   const onSubmit = async (data: any) => {
     const formData = makeFormData(data);
-
     try {
       let userdata;
       if (isLogin) {

@@ -1,4 +1,3 @@
-import { UserProp } from "@/components/Header/model/types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface authState {

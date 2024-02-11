@@ -18,13 +18,14 @@ import {
   LoginButtonProp,
 } from "../model/types";
 import { BoxHeaderStyled, LinkStyled, ToolbarStyled } from "./styled";
+import { base_url } from "@/app/constants";
 
 const EmailWithAvatar = ({ user, logOut }: EmailWithAvatarProp) => {
   return (
     <>
       <Box mr={2}>
         <IconButton>
-          <Avatar alt="Avatar" src={`http://localhost:5001/${user.avatar}`} />
+          <Avatar alt="Avatar" src={`${base_url}${user.avatar}`} />
         </IconButton>
       </Box>
       <Typography variant="h6" mt={1.3} mr={1}>
@@ -61,11 +62,7 @@ export default function Header({
 
   return (
     <BoxHeaderStyled>
-      <ModalDialog
-        open={open}
-        handleClickOpen={handleClickOpen}
-        handleClose={handleClose}
-      />
+      <ModalDialog open={open} handleClose={handleClose} />
       <AppBar color="transparent" position="static">
         <ToolbarStyled>
           <Box display="flex">

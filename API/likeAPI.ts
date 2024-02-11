@@ -1,32 +1,16 @@
+import { likeProp } from "@/app/types";
 import { $host } from "./index";
 
-export const addLike = async (
-  uniquePostId: number,
-  userId: number,
-  userEmail: string
-) => {
-  const { data } = await $host.post("api/like/create", {
-    uniquePostId,
-    userId,
-    userEmail,
-  });
-  return data;
-};
-export const deleteLike = async (uniquePostId: number, userId: number) => {
-  const { data } = await $host.post("api/like/delete", {
-    uniquePostId,
-    userId,
-  });
-  return data;
-};
 export const getAllLikes = async () => {
   const { data } = await $host.get("api/like/getAllLikes");
   return data;
 };
-export const getAllLikesByPostId = async (uniquePostId: number) => {
-  const { data } = await $host.get(
-    "api/like/getAllLikesByPostId/" + uniquePostId
-  );
 
+export async function deleteLike(like: likeProp): Promise<likeProp> {
+  const { data } = await $host.post("api/like/delete", like);
   return data;
-};
+}
+export async function createLike(like: likeProp): Promise<likeProp> {
+  const { data } = await $host.post("api/like/create", like);
+  return data;
+}

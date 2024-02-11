@@ -4,30 +4,23 @@ import { Provider, useDispatch, useSelector } from "react-redux";
 import { RootState, store } from "../../../store";
 import Header from "@/components/Header/ui/Header";
 import Footer from "@/components/Footer/ui/Footer";
-import { addLike, getAllLikes } from "../../../API/likeAPI";
+import { getAllLikes } from "../../../API/likeAPI";
 import { Box, Button, Container, TextField, Typography } from "@mui/material";
 import { useEffect } from "react";
 import { check } from "../../../API/userApi";
 import { setAuth, setUser } from "../../../store/slices/authSlice";
-import { redirect } from "next/navigation";
 import { useForm } from "react-hook-form";
-import {
-  createPost,
-  getAllPosts,
-  getAllPostsByUserId,
-} from "../../../API/postAPI";
-import { addOneLike, setMyLikes } from "../../../store/slices/likesSlice";
-import CircularProgress from "@mui/material/CircularProgress";
+import { createPost, getAllPosts } from "../../../API/postAPI";
 import ColorButtons from "@/components/ColorButtons/ui/ColorButtons";
-import { addOneMyPosts } from "../../../store/slices/postsSlice";
 import intl from "react-intl-universal";
 import { initLocales } from "../locales/initLocales";
 import Post from "@/components/Post";
 import { DEFAULT_COLOR, RUSSIAN, colors } from "../constants";
 import DropzoneComponent from "@/components/Dropzone/ui/DropzoneComponent";
-import { getLNG, getPostsByUserId, makeFormDataPost } from "../utils";
+import { getLNG, makeFormDataPost } from "../utils";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { $host } from "../../../API";
+import { likeProp } from "../types";
 
 // TODO REMOVE ANY
 const Personal = () => {
@@ -39,7 +32,6 @@ const Personal = () => {
 
   const [selectedColor, setSelectedColor] = useState<string>(DEFAULT_COLOR);
 
-  const { myLikes } = useSelector((state: RootState) => state.likes);
   const filePickerRef = useRef<HTMLInputElement>(null);
   initLocales(language);
   const queryClient = useQueryClient();
@@ -58,13 +50,10 @@ const Personal = () => {
 
   const title = watch("title");
   const description = watch("description");
-  console.log("iser: ", user);
 
-  async function createPo(post: any) {
-    debugger;
-    const { data } = await $host.post("api/post/create", post);
-    return data;
-  }
+  const mutation = useMutation((newPost) => createPost(newPost), {
+    onSuccess: () => queryClient.invalidateQueries("postssById"),
+  });
 
   const { error, data: allPostsById } = useQuery(
     "postssById",
@@ -75,14 +64,15 @@ const Personal = () => {
     }
   );
 
-  const mutation = useMutation((newPost) => createPo(newPost), {
-    onSuccess: () => queryClient.invalidateQueries("postssById"),
+  const { data: allLikes } = useQuery("allLikes", () => getAllLikes(), {
+    refetchOnMount: true,
+    staleTime: 100,
   });
-  console.log("allPostsById: ", allPostsById);
+
   const onSubmit = async (data: any) => {
     const date = new Date();
     const uniquePostId = Math.floor(Math.random() * 10000) + 1;
-    const formData = makeFormDataPost(
+    const post = makeFormDataPost(
       data,
       date,
       uniquePostId,
@@ -90,23 +80,8 @@ const Personal = () => {
       file,
       selectedColor
     ) as any;
-    mutation.mutate(formData);
-  };
-
-  const getAllLikesHandler = async () => {
-    try {
-      await getAllLikes().then((likes) => dispatch(setMyLikes(likes)));
-    } catch (error) {}
-  };
-  const addLikeHandler = async (uniquePostId: number) => {
-    try {
-      await addLike(uniquePostId, user.id, user.email).then((like) => {
-        dispatch(addOneLike(like));
-        getAllLikesHandler();
-      });
-    } catch (e) {
-      alert("Something went wrong!");
-    }
+    mutation.mutate(post);
+    reset();
   };
 
   const handleChangeFile = (e: any) => {
@@ -126,8 +101,6 @@ const Personal = () => {
         dispatch(setAuth(true));
       });
     }
-
-    getAllLikesHandler();
 
     getLNG(language, setLanguage);
   }, []);
@@ -150,11 +123,9 @@ const Personal = () => {
               .map((item: any, id: any) => (
                 <Post
                   key={id}
-                  myLikes={myLikes.filter(
-                    (like) => like.uniquePostId === item.uniquePostId
+                  postLikes={allLikes.filter(
+                    (like: likeProp) => like.uniquePostId === item.uniquePostId
                   )}
-                  getAllLikesHandler={getAllLikesHandler}
-                  addLikeHandler={addLikeHandler}
                   post={item}
                 />
               ))}

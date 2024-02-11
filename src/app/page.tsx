@@ -11,24 +11,23 @@ import { initLocales } from "./locales/initLocales";
 import intl from "react-intl-universal";
 import LinearProgress from "@mui/material/LinearProgress";
 import Post from "@/components/Post";
-import { addLikeHandler, getAllLikesHandler, getLNG } from "./utils";
 import { RUSSIAN } from "./constants";
 import { useQuery } from "react-query";
 import { getAllPosts } from "../../API/postAPI";
-
-interface likeProp {
-  id: number;
-  postId?: number;
-  uniquePostId: number;
-  userEmail: string;
-  userId: number;
-}
+import { getAllLikes } from "../../API/likeAPI";
+import { likeProp } from "./types";
+import { getLNG } from "./utils";
 
 export default function Home() {
   const dispatch = useDispatch();
-  const { user, isAuth } = useSelector((state: RootState) => state.auth);
-  const { myLikes } = useSelector((state: RootState) => state.likes);
+  const { isAuth } = useSelector((state: RootState) => state.auth);
   const [language, setLanguage] = useState<string>(RUSSIAN);
+  initLocales(language);
+
+  const { data: allLikes } = useQuery("allLikes", () => getAllLikes(), {
+    refetchOnMount: true,
+    staleTime: 100,
+  });
 
   const {
     isLoading,
@@ -37,11 +36,6 @@ export default function Home() {
   } = useQuery("allPost", getAllPosts, {
     keepPreviousData: true,
   });
-  initLocales(language);
-
-  useEffect(() => {
-    getLNG(language, setLanguage);
-  }, []);
 
   useEffect(() => {
     if (localStorage.getItem("userToken")) {
@@ -53,9 +47,7 @@ export default function Home() {
         .catch(() => console.log("unauthorized"))
         .finally(() => {});
     }
-  }, []);
-  useEffect(() => {
-    getAllLikesHandler(dispatch);
+    getLNG(language, setLanguage);
   }, []);
 
   if (error) {
@@ -89,15 +81,11 @@ export default function Home() {
           <Container>
             {allPosts.map((item: any, id: number) => (
               <Post
-                getAllLikesHandler={() => getAllLikesHandler(dispatch)}
-                myLikes={
-                  myLikes &&
-                  myLikes.filter(
+                postLikes={
+                  allLikes &&
+                  allLikes.filter(
                     (like: likeProp) => like.uniquePostId === item.uniquePostId
                   )
-                }
-                addLikeHandler={() =>
-                  addLikeHandler(item.uniquePostId, user, dispatch)
                 }
                 key={id}
                 post={item}

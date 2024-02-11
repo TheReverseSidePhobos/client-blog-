@@ -1,10 +1,12 @@
+import { likeProp } from "@/app/types";
+import { PostProp } from "@/components/Post/model/types";
+
 export interface PostCarProp {
-  post: any;
-  isForAllUsers: any;
+  post: PostProp;
+  isForAllUsers: boolean | undefined;
   deleteHandler: any;
-  myLikes: any;
-  toolTipTitle: any;
-  likeClickHandler: any;
+  postLikes: Array<likeProp> | any;
+  toolTipTitle: string | undefined;
 }
 
 export interface userMadePostDataProp {
@@ -12,7 +14,7 @@ export interface userMadePostDataProp {
   createdAt: string;
   email: string;
   id: number;
-  password: string; // ?? какого хрена здесь пароль
+  password: string;
   role: string;
   updatedAt: string;
 }
